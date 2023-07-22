@@ -1,7 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
 from rest_framework.response import Response
-from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from document_management.serializers import DocumentSerializer
 from document_management.models import Document
@@ -11,7 +10,8 @@ from document_management.utils import convert_docx_to_pdf
 from django.urls import path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
-
+from .serializers import *
+from .models import *
 
 
 @api_view(['POST'])
@@ -54,17 +54,14 @@ def document_list_create(request):
         serializer = DocumentSerializer(queryset, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
-        serializer = DocumentSerializer(data=request.data)
+        serializer = DocumentSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            file_obj = request.data.get('file')
-            if file_obj:
-                if file_obj.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                    pdf_file = convert_docx_to_pdf(file_obj.temporary_file_path())
-                    serializer.save(owner=request.user, file=pdf_file)
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
-            serializer.save(owner=request.user)
+            file_obj = request.FILES.get('file')
+            serializer.save(owner=request.user, file=file_obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
