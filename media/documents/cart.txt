@@ -1,0 +1,30 @@
+(K7womhkk{if
+pass putul
+
+
+def cart(request):
+    user = request.user
+    cc = Cart.objects.filter(user=user).count()
+    cart_prod = Cart.objects.filter(user=user)
+    if cart_prod:
+        total = 0.00
+        amount = 0.00
+        shipping = 1
+        cartProduct = [p for p in Cart.objects.all() if p.user == user]
+        if cartProduct:
+            for p in cartProduct:
+                tempAmount = (p.quantity)*(p.product.price)
+                amount = amount + tempAmount
+                totalAmountShipping = amount + shipping
+
+    remov = request.GET.get('remove')
+    if remov:
+        a = Cart.objects.get(user = user , product = remov)
+        a.delete()
+        return redirect('cart')
+
+
+<td class="save-remove">
+   <h4 class="table-title text-content">Action</h4>
+   <a  class="remove close_button" href="?remove={{p.product.id}}">Remove</a>
+</td>

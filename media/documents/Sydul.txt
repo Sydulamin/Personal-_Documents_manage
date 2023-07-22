@@ -1,0 +1,35 @@
+html:---
+
+<div class="d-flex mt-3  justify-content-center">
+                                            <form action="{% url 'update_quantity' i.product.id 'decrement' %}" method="POST">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-small"><i class="fa-solid fa-minus"></i></button>
+                                            </form>
+                                            <p class="mx-2">{{ i.quantity }}</p>
+                                            <form action="{% url 'update_quantity' i.product.id 'increment' %}" method="POST">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-small"><i class="fa-solid fa-plus"></i></button>
+                                            </form>
+                                        </div>
+
+
+
+url:-
+
+path('update_quantity/<int:product_id>/<str:action>/', update_quantity, name='update_quantity'),
+
+views:-
+
+
+def update_quantity(request, product_id, action):
+
+    product = Cart.objects.get(product=product_id, user=request.user)
+    print(product)
+    if action == 'increment':
+        product.quantity += 1
+    elif action == 'decrement':
+        if product.quantity > 0:
+            product.quantity -= 1
+    product.save()
+    return redirect('cartPage')   
+01308054948
